@@ -93,6 +93,23 @@ jobs:
         cat buildozer.spec
         echo "=== End of buildozer.spec ==="
 
+    - name: Accept Android SDK Licenses
+      run: |
+        # 进入 Android SDK 根目录
+        cd /home/runner/.buildozer/android/platform/android-sdk || exit 1
+
+        # 创建 licenses 目录
+        mkdir -p licenses
+
+        # 自动同意所有必要的许可（通用做法）
+        echo "89316a2ffe0e01b6d91f2f87be9676f5e584ddc6" > licenses/android-sdk-license
+        echo "24333f8a63b6825ea9c5514f83c2829b004d1fee" >> licenses/android-sdk-license
+
+        # 对于新版本的 Build-Tools，可能还需要这个
+        echo "d56f5187479451eabf01fb78af6dfcb131a6481e" > licenses/android-sdk-preview-license
+
+        echo "✅ Android 许可协议已自动接受"
+
     - name: Build APK with Buildozer
       run: |
         echo "Starting APK build process..."
