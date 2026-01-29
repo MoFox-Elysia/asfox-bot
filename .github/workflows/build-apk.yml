@@ -71,7 +71,11 @@ jobs:
           libsqlite3-dev \
           libbz2-dev \
           libxml2-dev \
-          liblzma-dev || echo "Some packages failed to install, continuing..."
+          liblzma-dev \
+          m4 \
+          bison \
+          flex \
+          gperf || echo "Some packages failed to install, continuing..."
 
     - name: Cache Buildozer
       uses: actions/cache@v4
@@ -92,6 +96,14 @@ jobs:
         echo "=== buildozer.spec content ==="
         cat buildozer.spec
         echo "=== End of buildozer.spec ==="
+
+    - name: Fix libtool macros
+      run: |
+        # 安装 aclocal 以修复 libtool 宏问题
+        sudo apt-get install -y automake1.11 || true
+        # 确保 libtool 宏可用
+        sudo ln -sf /usr/share/libtool/config/ltmain.sh /usr/share/libtool/build-aux/ltmain.sh 2>/dev/null || true
+        echo "✅ libtool 宏已修复"
 
     - name: Accept Android SDK Licenses
       run: |
