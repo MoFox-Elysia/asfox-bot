@@ -97,12 +97,26 @@ jobs:
         cat buildozer.spec
         echo "=== End of buildozer.spec ==="
 
+    - name: Install Libtool 2.4.6 for compatibility
+      run: |
+        echo "安装兼容的 Libtool 2.4.6 版本..."
+        # 下载并安装 Libtool 2.4.6
+        cd /tmp
+        wget http://ftpmirror.gnu.org/libtool/libtool-2.4.6.tar.gz 2>/dev/null || wget https://ftp.gnu.org/gnu/libtool/libtool-2.4.6.tar.gz
+        tar xzf libtool-2.4.6.tar.gz
+        cd libtool-2.4.6
+        ./configure --prefix=/usr
+        make -j$(nproc)
+        sudo make install
+        sudo ldconfig
+        echo "✅ Libtool 2.4.6 安装完成"
+        libtool --version
+
     - name: Fix libtool macros
       run: |
-        # 安装 aclocal 以修复 libtool 宏问题
-        sudo apt-get install -y automake1.11 || true
         # 确保 libtool 宏可用
-        sudo ln -sf /usr/share/libtool/config/ltmain.sh /usr/share/libtool/build-aux/ltmain.sh 2>/dev/null || true
+        sudo ln -sf /usr/share/libtool/build-aux/ltmain.sh /usr/share/libtool/config/ltmain.sh 2>/dev/null || true
+        sudo mkdir -p /usr/share/aclocal
         echo "✅ libtool 宏已修复"
 
     - name: Accept Android SDK Licenses
