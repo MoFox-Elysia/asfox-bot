@@ -134,9 +134,9 @@ jobs:
       with:
         name: debug-apk
         path: |
-          bin/*.apk
-          .buildozer/android/platform/build-*/build/outputs/apk/debug/*.apk
-          .buildozer/android/platform/build-*/build/outputs/apk/release/*.apk
+          ./bin/*.apk
+          ./.buildozer/android/platform/build-*/build/outputs/apk/debug/*.apk
+          ./.buildozer/android/platform/build-*/build/outputs/apk/release/*.apk
         retention-days: 30
         if-no-files-found: warn
 
