@@ -30,7 +30,9 @@ jobs:
     - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip setuptools wheel
-        pip install buildozer python-for-android cython
+        # 强制安装 Cython 0.29.33 以兼容 Pyjnius
+        pip install Cython==0.29.33
+        pip install buildozer python-for-android
 
     - name: Install system dependencies
       run: |
