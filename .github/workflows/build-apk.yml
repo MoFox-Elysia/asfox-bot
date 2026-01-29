@@ -102,6 +102,12 @@ jobs:
         echo "Build completed!"
       continue-on-error: false
 
+    - name: Find APK Location
+      run: |
+        echo "=== 查看 .buildozer 目录结构 ==="
+        # 这会列出 build 目录下的所有文件
+        find .buildozer -name "*.apk" 2>/dev/null || echo "未找到 APK"
+
     - name: Find and display APK files
       run: |
         echo "Searching for APK files..."
