@@ -80,7 +80,11 @@ jobs:
           m4 \
           bison \
           flex \
-          gperf || echo "Some packages failed to install, continuing..."
+          gperf \
+          lld \
+          clang \
+          libc++-dev \
+          libc++abi-dev || echo "Some packages failed to install, continuing..."
 
     - name: Cache Buildozer
       uses: actions/cache@v4

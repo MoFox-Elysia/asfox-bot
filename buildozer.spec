@@ -59,7 +59,8 @@ android.features = android.hardware.camera
 android.min_sdk = 21
 
 # (str) Android archs
-android.archs = arm64-v8a,armeabi-v7a
+# 只构建 arm64-v8a 以加快构建速度
+android.archs = arm64-v8a
 
 # (bool) Enable AndroidX support.
 android.enable_androidx = True
