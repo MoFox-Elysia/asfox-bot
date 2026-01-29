@@ -47,7 +47,7 @@ android.ndk_api = 21
 
 # (bool) Copy your application's assets to the app's "assets" folder.
 # This allows the app to access them at runtime.
-android.copy_extras = Python/kivy/app.py
+#android.copy_extras = Python/kivy/app.py
 
 # (list) Permissions
 android.permissions = CAMERA,WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE

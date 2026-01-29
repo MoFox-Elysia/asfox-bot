@@ -62,6 +62,7 @@ A: 查看 Actions 的构建日志，通常是因为：
 - 依赖包版本冲突
 - 代码语法错误
 - buildozer.spec 配置问题
+- 系统依赖包缺失
 
 ### Q: 如何修改构建配置？
 A: 编辑 `.github/workflows/build-apk.yml` 文件
@@ -71,6 +72,79 @@ A: 修改 workflow 文件，将 `buildozer android debug` 改为 `buildozer andr
 
 ### Q: 构建需要多长时间？
 A: 首次构建约 20-30 分钟，后续因为有缓存会快一些（10-15 分钟）
+
+## 故障排除
+
+### 构建失败：缺少系统依赖包
+
+如果构建失败并提示缺少系统依赖包，请检查以下几点：
+
+1. **查看构建日志**
+   - 在 Actions 页面点击失败的构建任务
+   - 查看详细的错误信息
+   - 确认是哪个依赖包缺失
+
+2. **已包含的系统依赖**
+   当前配置已包含以下依赖包：
+   - Java 17 (openjdk-17-jdk)
+   - 构建工具 (build-essential, cmake, automake, libtool)
+   - 图像库 (libjpeg-dev, libpng-dev, libfreetype6-dev)
+   - GUI 库 (libcairo2-dev, libpango1.0-dev, libgtk-3-dev)
+   - 数据库库 (libsqlite3-dev)
+   - 压缩库 (zlib1g-dev, libbz2-dev)
+   - Kivy 相关库 (libsdl2-dev, libsdl2-image-dev, 等)
+
+3. **添加缺少的依赖**
+   如果需要添加其他依赖，编辑 `.github/workflows/build-apk.yml`：
+   ```yaml
+   - name: Install system dependencies
+     run: |
+       sudo apt-get update
+       sudo apt-get install -y \
+         # 在这里添加缺少的包名
+   ```
+
+4. **常见错误和解决方案**
+
+   **错误：`command 'gcc' failed`**
+   - 解决方案：确保已安装 `build-essential`
+
+   **错误：`Python.h: No such file or directory`**
+   - 解决方案：确保已安装 `python3-dev`
+
+   **错误：`jpeglib.h: No such file or directory`**
+   - 解决方案：确保已安装 `libjpeg-dev`
+
+   **错误：`freetype/freetype.h: No such file or directory`**
+   - 解决方案：确保已安装 `libfreetype6-dev`
+
+   **错误：`sqlite3.h: No such file or directory`**
+   - 解决方案：确保已安装 `libsqlite3-dev`
+
+   **错误：`Java not found`**
+   - 解决方案：确保已安装 `openjdk-17-jdk`
+
+5. **重新构建**
+   修复后，提交更改并推送：
+   ```bash
+   git add .
+   git commit -m "Fix: Add missing dependencies"
+   git push
+   ```
+
+### 构建超时
+
+如果构建超时，可以尝试：
+1. 减少构建的架构数量（只构建 arm64-v8a）
+2. 使用更简单的依赖包
+3. 增加 GitHub Actions 的超时时间
+
+### APK 无法安装
+
+如果生成的 APK 无法安装：
+1. 检查 Android 版本是否满足最低要求（API 21+）
+2. 确保设备允许安装未知来源的应用
+3. 尝试使用 release 版本而非 debug 版本
 
 ## 技术细节
 
