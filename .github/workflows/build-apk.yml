@@ -111,11 +111,23 @@ jobs:
         echo "=== Checking .buildozer/bin/ directory ==="
         ls -la .buildozer/bin/ 2>/dev/null || echo ".buildozer/bin/ directory not found"
 
-        echo "=== Searching for all .apk files in the project ==="
-        find . -name "*.apk" -type f 2>/dev/null
+        echo "=== Checking .buildozer/android/platform/ directory ==="
+        find .buildozer/android/platform/ -name "*.apk" -type f 2>/dev/null || echo "No APK in platform directory"
 
-        echo "=== Searching recursively for .apk files ==="
+        echo "=== Checking build outputs directory ==="
+        find .buildozer/android/platform/build-*/build/outputs/apk/ -name "*.apk" -type f 2>/dev/null || echo "No APK in build outputs"
+
+        echo "=== Searching recursively for all .apk files ==="
         find . -type f -name "*.apk" -exec ls -lh {} \; 2>/dev/null || echo "No APK files found"
+
+        echo "=== Copying APK to bin/ directory if found ==="
+        APK_FILE=$(find . -type f -name "*.apk" | head -n 1)
+        if [ -n "$APK_FILE" ]; then
+          echo "Found APK: $APK_FILE"
+          mkdir -p bin/
+          cp "$APK_FILE" bin/
+          ls -lh bin/*.apk
+        fi
 
     - name: Upload APK artifact
       uses: actions/upload-artifact@v4
@@ -123,8 +135,8 @@ jobs:
         name: debug-apk
         path: |
           bin/*.apk
-          .buildozer/bin/*.apk
-          **/*.apk
+          .buildozer/android/platform/build-*/build/outputs/apk/debug/*.apk
+          .buildozer/android/platform/build-*/build/outputs/apk/release/*.apk
         retention-days: 30
         if-no-files-found: warn
 
