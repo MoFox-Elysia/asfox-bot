@@ -5,7 +5,7 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
-  workflow_dispatch:  # 允许手动触发
+  workflow_dispatch:
 
 jobs:
   build:
@@ -103,13 +103,6 @@ jobs:
       run: |
         echo "Cleaning previous build..."
         buildozer android clean
-      continue-on-error: true
-      run: |
-        buildozer --version
-
-    - name: Initialize Buildozer (download dependencies)
-      run: |
-        buildozer init
       continue-on-error: true
 
     - name: Build APK with Buildozer
