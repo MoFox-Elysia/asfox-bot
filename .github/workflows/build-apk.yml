@@ -32,7 +32,10 @@ jobs:
         python -m pip install --upgrade pip setuptools wheel
         # 强制安装 Cython 0.29.33 以兼容 Pyjnius
         pip install Cython==0.29.33
-        pip install buildozer python-for-android
+        # 安装特定版本的 buildozer 和 python-for-android
+        pip install buildozer==1.5.0 python-for-android==2024.1.21
+        # 验证安装
+        python -c "import Cython; print(f'Cython version: {Cython.__version__}')"
 
     - name: Install system dependencies
       run: |
@@ -122,6 +125,29 @@ jobs:
         echo "✅ libtool 宏已修复"
 
     - name: Accept Android SDK Licenses
+      run: |
+        # 进入 Android SDK 根目录
+        cd /home/runner/.buildozer/android/platform/android-sdk || exit 1
+
+        # 创建 licenses 目录
+        mkdir -p licenses
+
+        # 自动同意所有必要的许可（通用做法）
+        echo "89316a2ffe0e01b6d91f2f87be9676f5e584ddc6" > licenses/android-sdk-license
+        echo "24333f8a63b6825ea9c5514f83c2829b004d1fee" >> licenses/android-sdk-license
+
+        # 对于新版本的 Build-Tools，可能还需要这个
+        echo "d56f5187479451eabf01fb78af6dfcb131a6481e" > licenses/android-sdk-preview-license
+
+        echo "✅ Android 许可协议已自动接受"
+
+    - name: Clean build environment
+      run: |
+        echo "清理构建环境..."
+        rm -rf .buildozer || true
+        echo "✅ 构建环境已清理"
+
+    - name: Build APK with Buildozer
       run: |
         # 进入 Android SDK 根目录
         cd /home/runner/.buildozer/android/platform/android-sdk || exit 1
