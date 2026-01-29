@@ -124,6 +124,16 @@ A: 首次构建约 20-30 分钟，后续因为有缓存会快一些（10-15 分�
    **错误：`Java not found`**
    - 解决方案：确保已安装 `openjdk-17-jdk`
 
+   **错误：`E: Unable to locate package libtinfo5`**
+   - 解决方案：将 `libtinfo5` 替换为 `libtinfo-dev`
+   ```yaml
+   # 错误的配置
+   libtinfo5
+
+   # 正确的配置
+   libtinfo-dev
+   ```
+
 5. **重新构建**
    修复后，提交更改并推送：
    ```bash

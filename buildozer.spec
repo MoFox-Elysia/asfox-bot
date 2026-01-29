@@ -34,7 +34,7 @@ orientation = portrait
 fullscreen = 0
 
 # (str) Android NDK version to use
-android.ndk = 25b
+# android.ndk = 25b
 
 # (str) Android NDK API level to use
 android.minapi = 21
