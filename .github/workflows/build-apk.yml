@@ -93,12 +93,6 @@ jobs:
         cat buildozer.spec
         echo "=== End of buildozer.spec ==="
 
-    - name: Initialize Buildozer
-      run: |
-        echo "Initializing Buildozer..."
-        buildozer init
-      continue-on-error: true
-
     - name: Build APK with Buildozer
       run: |
         echo "Starting APK build process..."
