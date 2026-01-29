@@ -99,16 +99,11 @@ jobs:
         buildozer init
       continue-on-error: true
 
-    - name: Clean previous build
-      run: |
-        echo "Cleaning previous build..."
-        buildozer android clean
-      continue-on-error: true
-
     - name: Build APK with Buildozer
       run: |
         echo "Starting APK build process..."
         echo "This may take 20-30 minutes, please be patient..."
+        echo "Downloading dependencies and compiling..."
         buildozer -v android debug 2>&1 | tee build.log
         echo "Build completed!"
       continue-on-error: false
