@@ -87,6 +87,35 @@ jobs:
           libc++-dev \
           libc++abi-dev || echo "Some packages failed to install, continuing..."
 
+    - name: Fix libtool for libffi compatibility
+      run: |
+        echo "修复 libtool 以兼容 libffi 构建..."
+        # libffi 的 autogen.sh 需要 libtoolize，但某些系统中 libtoolize 可能不可用
+        # 我们需要确保 libtool 宏可用
+        sudo mkdir -p /usr/share/aclocal
+
+        # 检查 libtoolize 是否可用
+        if ! command -v libtoolize &> /dev/null; then
+          echo "libtoolize 不可用，尝试安装..."
+          sudo apt-get install -y libtool-bin || echo "libtool-bin 安装失败"
+        fi
+
+        # 确保 aclocal 可以找到 libtool 宏
+        if [ -f /usr/share/aclocal/libtool.m4 ]; then
+          echo "libtool.m4 已存在"
+        else
+          echo "尝试创建 libtool.m4 符号链接..."
+          sudo find /usr -name "libtool.m4" 2>/dev/null | head -n 1 | xargs -I {} sudo ln -sf {} /usr/share/aclocal/ || echo "无法找到 libtool.m4"
+        fi
+
+        # 确保 ltmain.sh 可用
+        if [ -f /usr/share/libtool/build-aux/ltmain.sh ]; then
+          sudo ln -sf /usr/share/libtool/build-aux/ltmain.sh /usr/share/libtool/config/ltmain.sh 2>/dev/null || true
+        fi
+
+        echo "✅ libtool 修复完成"
+        libtool --version || echo "无法获取 libtool 版本"
+
     - name: Cache Buildozer
       uses: actions/cache@v4
       with:
