@@ -30,91 +30,60 @@ jobs:
     - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip setuptools wheel
-        # 使用最新稳定版本的 Cython
-        pip install Cython
-        # 安装最新版本的 buildozer 和 python-for-android
-        pip install buildozer python-for-android
-        # 验证安装
-        python -c "import Cython; print(f'Cython version: {Cython.__version__}')"
-        buildozer --version
+        pip install Cython buildozer python-for-android
 
     - name: Install system dependencies
       run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-          build-essential \
-          git \
-          ffmpeg \
-          libsdl2-dev \
-          libsdl2-image-dev \
-          libsdl2-mixer-dev \
-          libsdl2-ttf-dev \
-          libportmidi-dev \
-          libswscale-dev \
-          libavformat-dev \
-          libavcodec-dev \
-          zlib1g-dev \
-          libgstreamer1.0-dev \
-          gstreamer1.0-plugins-base \
-          gstreamer1.0-plugins-good \
-          autoconf \
-          libtool \
-          pkg-config \
-          libncurses5-dev \
-          libncursesw5-dev \
-          libtinfo-dev \
-          cmake \
-          libffi-dev \
-          libssl-dev \
-          automake \
-          zip \
-          unzip \
-          openjdk-17-jdk \
-          python3-dev \
-          libjpeg-dev \
-          libpng-dev \
-          libfreetype6-dev \
-          libsqlite3-dev \
-          libbz2-dev \
-          libxml2-dev \
-          liblzma-dev \
-          m4 \
-          bison \
-          flex \
-          gperf \
-          lld \
-          clang \
-          libc++-dev \
-          libc++abi-dev || echo "Some packages failed to install, continuing..."
+        sudo apt-get update -qq
+        sudo apt-get install -y -qq \
+          build-essential git ffmpeg \
+          libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev \
+          libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev \
+          zlib1g-dev libgstreamer1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good \
+          autoconf libtool pkg-config \
+          libncurses5-dev libncursesw5-dev libtinfo-dev cmake \
+          libffi-dev libssl-dev automake zip unzip \
+          openjdk-17-jdk python3-dev \
+          libjpeg-dev libpng-dev libfreetype6-dev libsqlite3-dev \
+          libbz2-dev libxml2-dev liblzma-dev \
+          m4 bison flex gperf lld clang libc++-dev libc++abi-dev libtool-bin \
+          > /dev/null 2>&1 || echo "Some packages failed to install, continuing..."
 
     - name: Fix libtool for libffi compatibility
       run: |
-        echo "修复 libtool 以兼容 libffi 构建..."
-        # libffi 的 autogen.sh 需要 libtoolize，但某些系统中 libtoolize 可能不可用
-        # 我们需要确保 libtool 宏可用
         sudo mkdir -p /usr/share/aclocal
-
-        # 检查 libtoolize 是否可用
-        if ! command -v libtoolize &> /dev/null; then
-          echo "libtoolize 不可用，尝试安装..."
-          sudo apt-get install -y libtool-bin || echo "libtool-bin 安装失败"
-        fi
-
-        # 确保 aclocal 可以找到 libtool 宏
-        if [ -f /usr/share/aclocal/libtool.m4 ]; then
-          echo "libtool.m4 已存在"
-        else
-          echo "尝试创建 libtool.m4 符号链接..."
-          sudo find /usr -name "libtool.m4" 2>/dev/null | head -n 1 | xargs -I {} sudo ln -sf {} /usr/share/aclocal/ || echo "无法找到 libtool.m4"
-        fi
-
-        # 确保 ltmain.sh 可用
+        sudo apt-get install -y -qq libtool-bin > /dev/null 2>&1 || true
+        sudo find /usr -name "libtool.m4" 2>/dev/null | head -n 1 | xargs -I {} sudo ln -sf {} /usr/share/aclocal/ 2>/dev/null || true
         if [ -f /usr/share/libtool/build-aux/ltmain.sh ]; then
           sudo ln -sf /usr/share/libtool/build-aux/ltmain.sh /usr/share/libtool/config/ltmain.sh 2>/dev/null || true
         fi
 
-        echo "✅ libtool 修复完成"
-        libtool --version || echo "无法获取 libtool 版本"
+    - name: Patch libffi autogen.sh
+      run: |
+        # 创建补丁目录
+        sudo mkdir -p /opt/libffi-patch
+
+        # 创建修复后的 autogen.sh
+        sudo tee /opt/libffi-patch/autogen.sh > /dev/null << 'EOF'
+#!/bin/sh
+# Run autoreconf to generate build files.
+
+set -x
+
+if [ "$#" -ne 0 ]; then
+  echo "Usage: $0" 1>&2
+  exit 1
+fi
+
+autoreconf --install --force --verbose
+EOF
+
+        sudo chmod +x /opt/libffi-patch/autogen.sh
+
+    - name: Set up Buildozer environment
+      run: |
+        mkdir -p .buildozer
+        echo -e "[app]\ntitle = 错题整理软件\npackage.name = errorquestion\npackage.domain = org.errorquestion\nsource.dir = .\nsource.include_exts = py,png,jpg,kv,atlas,txt\nversion = 1.0.0\nrequirements = python3,kivy,pillow,fpdf2,pyjnius,plyer,cython,pyopenssl\norientation = portrait\nfullscreen = 0\nandroid.minapi = 21\nandroid.api = 33\nandroid.ndk_api = 21\nandroid.permissions = CAMERA,WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE\nandroid.features = android.hardware.camera\nandroid.min_sdk = 21\nandroid.archs = arm64-v8a\nandroid.enable_androidx = True\nandroid.entrypoint = org.kivy.android.PythonActivity\n\n[buildozer]\nlog_level = 2\nwarn_on_root = 1" > buildozer.spec
 
     - name: Cache Buildozer
       uses: actions/cache@v4
@@ -128,54 +97,24 @@ jobs:
 
     - name: Clean build environment
       run: |
-        echo "清理构建环境..."
-        rm -rf .buildozer || true
-        echo "✅ 构建环境已清理"
+        rm -rf .buildozer 2>/dev/null || true
 
     - name: Build APK with Buildozer
       run: |
-        echo "Starting APK build process..."
-        echo "This may take 20-30 minutes, please be patient..."
-        echo "Downloading dependencies and compiling..."
-        buildozer -v android debug 2>&1 | tee build.log
-        echo "Build completed!"
+        buildozer android debug 2>&1 | tee build.log
       continue-on-error: false
 
     - name: Find and display APK files
       run: |
-        echo "Searching for APK files..."
-        echo "=== Checking bin/ directory ==="
-        ls -la bin/ 2>/dev/null || echo "bin/ directory not found"
-
-        echo "=== Checking .buildozer/bin/ directory ==="
-        ls -la .buildozer/bin/ 2>/dev/null || echo ".buildozer/bin/ directory not found"
-
-        echo "=== Checking .buildozer/android/platform/ directory ==="
-        find .buildozer/android/platform/ -name "*.apk" -type f 2>/dev/null || echo "No APK in platform directory"
-
-        echo "=== Checking build outputs directory ==="
-        find .buildozer/android/platform/build-*/build/outputs/apk/ -name "*.apk" -type f 2>/dev/null || echo "No APK in build outputs"
-
-        echo "=== Searching recursively for all .apk files ==="
-        find . -type f -name "*.apk" -exec ls -lh {} \; 2>/dev/null || echo "No APK files found"
-
-        echo "=== Copying APK to bin/ directory if found ==="
-        APK_FILE=$(find . -type f -name "*.apk" | head -n 1)
-        if [ -n "$APK_FILE" ]; then
-          echo "Found APK: $APK_FILE"
-          mkdir -p bin/
-          cp "$APK_FILE" bin/
-          ls -lh bin/*.apk
-        fi
+        mkdir -p bin/
+        find . -type f -name "*.apk" 2>/dev/null -exec cp {} bin/ \;
+        ls -lh bin/*.apk 2>/dev/null || echo "No APK files found"
 
     - name: Upload APK artifact
       uses: actions/upload-artifact@v4
       with:
         name: debug-apk
-        path: |
-          ./bin/*.apk
-          ./.buildozer/android/platform/build-*/build/outputs/apk/debug/*.apk
-          ./.buildozer/android/platform/build-*/build/outputs/apk/release/*.apk
+        path: ./bin/*.apk
         retention-days: 30
         if-no-files-found: warn
 
