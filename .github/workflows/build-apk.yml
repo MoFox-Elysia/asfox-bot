@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build Android APK (Simple)
 
 on:
   push:
@@ -24,13 +24,13 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.12'
+        python-version: '3.10'  # 使用更稳定的Python 3.10
         cache: 'pip'
 
     - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip setuptools wheel
-        pip install Cython buildozer python-for-android
+        pip install Cython==0.29.33 buildozer==1.5.0 python-for-android==2024.1.21
 
     - name: Install system dependencies
       run: |
@@ -49,55 +49,22 @@ jobs:
           m4 bison flex gperf lld clang libc++-dev libc++abi-dev libtool-bin \
           > /dev/null 2>&1 || echo "Some packages failed to install, continuing..."
 
-    - name: Fix libtool for libffi compatibility
+    - name: Pre-download Android SDK
       run: |
-        sudo mkdir -p /usr/share/aclocal
-        sudo apt-get install -y -qq libtool-bin > /dev/null 2>&1 || true
-        sudo find /usr -name "libtool.m4" 2>/dev/null | head -n 1 | xargs -I {} sudo ln -sf {} /usr/share/aclocal/ 2>/dev/null || true
-        if [ -f /usr/share/libtool/build-aux/ltmain.sh ]; then
-          sudo ln -sf /usr/share/libtool/build-aux/ltmain.sh /usr/share/libtool/config/ltmain.sh 2>/dev/null || true
-        fi
+        mkdir -p ~/.buildozer/android/platform
+        cd ~/.buildozer/android/platform
+        wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
+        unzip -q cmdline-tools.zip
+        mv cmdline-tools cmdline-tools-latest
+        mkdir -p cmdline-tools-latest/bin
+        echo "Android SDK downloaded"
 
-    - name: Patch libffi autogen.sh
+    - name: Accept Android SDK Licenses
       run: |
-        # 创建补丁目录
-        sudo mkdir -p /opt/libffi-patch
-
-        # 创建修复后的 autogen.sh
-        sudo tee /opt/libffi-patch/autogen.sh > /dev/null << 'EOF'
-#!/bin/sh
-# Run autoreconf to generate build files.
-
-set -x
-
-if [ "$#" -ne 0 ]; then
-  echo "Usage: $0" 1>&2
-  exit 1
-fi
-
-autoreconf --install --force --verbose
-EOF
-
-        sudo chmod +x /opt/libffi-patch/autogen.sh
-
-    - name: Set up Buildozer environment
-      run: |
-        mkdir -p .buildozer
-        echo -e "[app]\ntitle = 错题整理软件\npackage.name = errorquestion\npackage.domain = org.errorquestion\nsource.dir = .\nsource.include_exts = py,png,jpg,kv,atlas,txt\nversion = 1.0.0\nrequirements = python3,kivy,pillow,fpdf2,pyjnius,plyer,cython,pyopenssl\norientation = portrait\nfullscreen = 0\nandroid.minapi = 21\nandroid.api = 33\nandroid.ndk_api = 21\nandroid.permissions = CAMERA,WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE\nandroid.features = android.hardware.camera\nandroid.min_sdk = 21\nandroid.archs = arm64-v8a\nandroid.enable_androidx = True\nandroid.entrypoint = org.kivy.android.PythonActivity\n\n[buildozer]\nlog_level = 2\nwarn_on_root = 1" > buildozer.spec
-
-    - name: Cache Buildozer
-      uses: actions/cache@v4
-      with:
-        path: |
-          .buildozer
-          ~/.buildozer
-        key: ${{ runner.os }}-buildozer-${{ hashFiles('buildozer.spec') }}
-        restore-keys: |
-          ${{ runner.os }}-buildozer-
-
-    - name: Clean build environment
-      run: |
-        rm -rf .buildozer 2>/dev/null || true
+        mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
+        echo "89316a2ffe0e01b6d91f2f87be9676f5e584ddc6" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
+        echo "24333f8a63b6825ea9c5514f83c2829b004d1fee" >> ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
+        echo "d56f5187479451eabf01fb78af6dfcb131a6481e" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-preview-license
 
     - name: Build APK with Buildozer
       run: |

@@ -1,212 +1,121 @@
 # 错题整理软件 - Android应用
 
-一款专为学习设计的错题整理软件，帮助用户高效管理错题、组卷和复习。
+这是一个使用Kivy框架开发的错题整理Android应用。
 
-## 功能特性
+## 项目结构
 
-### 1. 拍错题（图片切割）
-- 支持拍照或从相册选择图片
-- 框选题目区域
-- 保存到草稿箱或直接添加到错题库
-
-### 2. 草稿箱
-- 暂存用户上传的图片
-- 支持快速添加到错题库
-- 支持删除草稿
-
-### 3. 错题库
-- 多级目录结构：科目 > 年级 > 章节/知识点/专题
-- 支持按科目、年级、章节、知识点、专题筛选
-- 按重要性和时间排序
-- 2列缩略图预览
-
-### 4. 错题信息编辑
-- **学科**（必填）：选择已有科目或创建新科目
-- **年级**（必填）：小学、初中、高中
-- **章节/知识点/专题**（至少填一个）：三种不同的整理逻辑
-- **重要性**（可选）：用于排序，越重要越靠前
-- **时间**（自动获取）：用于排序
-
-### 5. 组卷
-- A4/A3高分辨率模板（>300 DPI）
-- 从错题库选择多道错题
-- 自由拖动错题到模板任意位置
-- 保存为图片至本地相册或保存至题库
-
-### 6. 试卷库
-- 目录结构：科目 > 年级 > 卷组
-- 自定义卷组名称
-- 年级自动取最高年级
-- 1列缩略图预览
-
-### 7. 导入导出
-- 一键导出全部数据为压缩包
-- 单独导出试卷/错题为图片
-- 单独导出卷组为PDF文件
-- 支持导入数据恢复
-
-### 8. 打印
-- 在卷组、试卷、错题最大化预览界面提供打印选项
-- 调用系统打印服务
-
-### 9. 缩略预览
-- 错题：2列预览
-- 试卷和卷组：1列预览
-- 提供缩略图便于选择
-
-### 10. 主界面
-- 简洁明了的6个功能入口
-- 大字体设计，适合中老年用户
-- 界面清晰，操作简单
-
-## 技术架构
-
-### 技术栈
-- **编程语言**: Python 3.x
-- **UI框架**: Kivy 2.3.0
-- **数据库**: SQLite
-- **图片处理**: Pillow 10.3.0
-- **PDF生成**: fpdf2 2.7.6
-- **平台支持**: Android（通过Buildozer打包）
-
-### 项目结构
 ```
-C:\Users\Elysia\Desktop\STUDY\
-├── main.py                      # 应用入口
-├── database.py                  # 数据库管理
-├── main_screen.py               # 主界面
-├── photo_screen.py              # 拍错题界面
-├── draft_screen.py              # 草稿箱界面
-├── question_library_screen.py   # 错题库界面
-├── question_edit_screen.py      # 错题编辑界面
-├── paper_edit_screen.py         # 组卷编辑界面
-├── paper_library_screen.py      # 试卷库界面
-├── import_export.py             # 导入导出模块
-├── print_service.py             # 打印服务模块
-├── utils.py                     # 工具函数
-├── requirements.txt             # 依赖包列表
-├── buildozer.spec               # Android打包配置
-└── README.md                    # 项目说明
+.
+├── main.py                    # 主程序入口
+├── database.py                # 数据库管理
+├── main_screen.py            # 主界面
+├── photo_screen.py           # 拍照界面
+├── draft_screen.py           # 草稿界面
+├── question_library_screen.py # 错题库界面
+├── question_edit_screen.py   # 错题编辑界面
+├── paper_edit_screen.py      # 试卷编辑界面
+├── paper_library_screen.py   # 试卷库界面
+├── import_export.py          # 导入导出功能
+├── print_service.py          # 打印服务
+├── utils.py                  # 工具函数
+├── requirements.txt          # Python依赖
+├── buildozer.spec            # Buildozer配置文件
+├── buildozer-simple.spec     # 简化版Buildozer配置
+├── .github/workflows/        # GitHub Actions配置
+│   ├── build-apk.yml         # 完整构建配置
+│   └── build-apk-simple.yml  # 简化构建配置
 ```
 
-## 安装使用
+## 依赖说明
 
-### 开发环境配置
+### Python依赖
+- `kivy==2.3.0` - GUI框架
+- `pillow==10.3.0` - 图像处理
+- `fpdf2==2.7.6` - PDF生成
+- `pyjnius==1.6.1` - Java Native Interface
+- `plyer==2.1.0` - 平台特定功能
+- `cython==0.29.33` - C扩展编译器
+- `pyopenssl==23.2.0` - SSL支持
 
-1. **安装Python依赖**
-```bash
-cd C:\Users\Elysia\Desktop\STUDY
-pip install -r requirements.txt
-```
+## 构建APK
 
-2. **运行应用（桌面测试）**
-```bash
-python main.py
-```
+### 方法1：使用简化配置（推荐）
+1. 重命名文件：
+   ```bash
+   mv buildozer-simple.spec buildozer.spec
+   mv .github/workflows/build-apk-simple.yml .github/workflows/build-apk.yml
+   ```
 
-### Android打包
+2. 提交到GitHub，GitHub Actions会自动构建
 
-1. **安装Buildozer**
-```bash
-pip install buildozer
-```
+### 方法2：本地构建
+1. 安装Buildozer：
+   ```bash
+   pip install buildozer==1.5.0 python-for-android==2024.1.21 Cython==0.29.33
+   ```
 
-2. **初始化Buildozer**
-```bash
-buildozer init
-```
+2. 安装系统依赖：
+   ```bash
+   sudo apt-get install -y build-essential git ffmpeg libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev zlib1g-dev libgstreamer1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good autoconf libtool pkg-config libncurses5-dev libncursesw5-dev libtinfo-dev cmake libffi-dev libssl-dev automake zip unzip openjdk-17-jdk python3-dev libjpeg-dev libpng-dev libfreetype6-dev libsqlite3-dev libbz2-dev libxml2-dev liblzma-dev m4 bison flex gperf lld clang libc++-dev libc++abi-dev libtool-bin
+   ```
 
-3. **构建APK**
-```bash
-buildozer android debug
-```
+3. 构建APK：
+   ```bash
+   buildozer android debug
+   ```
 
-4. **构建发布版APK**
-```bash
-buildozer android release
-```
+## GitHub Actions配置
 
-## 使用说明
+### 完整配置 (`build-apk.yml`)
+- 使用Python 3.12
+- 最新版本的依赖
+- 包含libffi修复
 
-### 基本流程
-
-1. **添加错题**
-   - 点击"拍错题"按钮
-   - 选择或拍照获取图片
-   - 框选题目区域
-   - 选择保存到草稿箱或直接添加到错题库
-
-2. **编辑错题信息**
-   - 在错题库中找到错题
-   - 点击"编辑"按钮
-   - 填写科目、年级、章节/知识点/专题
-   - 设置重要性（可选）
-   - 保存
-
-3. **组卷**
-   - 点击"组卷"按钮
-   - 选择纸张大小（A4/A3）
-   - 点击"选择错题"
-   - 勾选要添加的错题
-   - 确认后错题出现在候选栏
-   - 拖动错题到模板上
-   - 调整位置和大小
-   - 保存为图片或保存到题库
-
-4. **查看试卷**
-   - 点击"试卷库"按钮
-   - 按科目、年级、卷组筛选
-   - 点击试卷查看详情
-   - 支持打印和导出
-
-5. **导入导出**
-   - 点击"导入导出"按钮
-   - 选择导出全部数据或导入数据
-   - 支持单独导出试卷/错题/卷组
-
-## 注意事项
-
-1. **权限要求**
-   - 相机权限：用于拍照
-   - 存储权限：用于保存图片和数据
-
-2. **文件存储**
-   - 数据存储在：`/sdcard/错题整理软件/data/`
-   - 图片存储在：`/sdcard/错题整理软件/images/`
-   - 导出文件：`/sdcard/错题整理软件/export/`
-
-3. **界面设计**
-   - 大字体（24-48sp）
-   - 按钮较大（高度80-120）
-   - 简洁明了，适合中老年用户
-
-## 开发计划
-
-- [ ] 增加OCR文字识别功能
-- [ ] 支持添加笔记和解析
-- [ ] 增加错题统计和复习提醒
-- [ ] 支持云端同步
-- [ ] 优化图片处理性能
-- [ ] 增加更多试卷模板
+### 简化配置 (`build-apk-simple.yml`)
+- 使用Python 3.10（更稳定）
+- 固定版本的依赖
+- 预下载Android SDK
+- 自动接受许可协议
 
 ## 常见问题
 
-### Q: 如何备份我的数据？
-A: 点击"导入导出"按钮，选择"导出全部数据"，会生成一个压缩包，保存在导出目录中。
+### 1. libffi构建失败
+错误信息：
+```
+configure.ac:418: You should run autoupdate.
+LT_SYS_SYMBOL_USCORE is expanded from...
+autoreconf: error: /usr/bin/autoconf failed
+```
 
-### Q: 如何在其他设备上恢复数据？
-A: 点击"导入导出"按钮，选择"导入数据"，选择之前导出的压缩包即可恢复。
+**解决方案**：
+- 使用简化配置（`buildozer-simple.spec`）
+- 使用固定版本的依赖
+- 预下载Android SDK
 
-### Q: 打印功能如何使用？
-A: 在错题或试卷的详情界面，点击"打印"按钮，系统会调用默认打印服务。
+### 2. 构建时间过长
+**解决方案**：
+- 只构建arm64-v8a架构
+- 使用GitHub Actions缓存
+- 预下载Android SDK
 
-### Q: 支持哪些图片格式？
-A: 支持 PNG、JPG、JPEG、BMP 等常见图片格式。
+### 3. 权限问题
+确保在`buildozer.spec`中正确配置权限：
+```ini
+android.permissions = CAMERA,WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE
+android.features = android.hardware.camera
+```
 
-## 许可证
+## 应用功能
 
-本项目仅供学习和个人使用。
+1. **拍照录入** - 拍摄错题照片
+2. **错题管理** - 分类整理错题
+3. **试卷生成** - 创建错题试卷
+4. **导出功能** - 导出为PDF格式
+5. **数据备份** - 导入导出数据
 
-## 联系方式
+## 技术支持
 
-如有问题或建议，请联系开发者。
+如果遇到构建问题，请：
+1. 查看GitHub Actions日志
+2. 使用简化配置
+3. 检查依赖版本兼容性

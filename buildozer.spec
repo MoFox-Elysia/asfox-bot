@@ -19,7 +19,7 @@ source.include_exts = py,png,jpg,kv,atlas,txt
 version = 1.0.0
 
 # (list) Application requirements
-requirements = python3,kivy,pillow,fpdf2,pyjnius,plyer,cython,pyopenssl
+requirements = python3,kivy==2.3.0,pillow==10.3.0,fpdf2==2.7.6,pyjnius==1.6.1,plyer==2.1.0,cython==0.29.33,pyopenssl==23.2.0
 
 # (str) Presplash of the application
 #presplash.filename = %(source.dir)s/data/presplash.png
@@ -34,7 +34,7 @@ orientation = portrait
 fullscreen = 0
 
 # (str) Android NDK version to use
-# android.ndk = 25b
+android.ndk = 25b
 
 # (str) Android NDK API level to use
 android.minapi = 21
