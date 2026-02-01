@@ -73,7 +73,7 @@ jobs:
         wget -q https://dl.google.com/android/repository/android-ndk-r25b-linux.zip -O android-ndk-r25b-linux.zip
         unzip -q android-ndk-r25b-linux.zip
         rm android-ndk-r25b-linux.zip
-        mv android-ndk-r25b android-ndk-r25b
+        # 注意：解压后目录已经是 android-ndk-r25b，不需要移动
         
         # 接受许可证
         echo "Accepting Android SDK licenses..."
