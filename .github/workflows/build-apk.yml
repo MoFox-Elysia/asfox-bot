@@ -46,7 +46,36 @@ jobs:
           libjpeg-dev \
           libpng-dev \
           libfreetype6-dev \
-          libsqlite3-dev
+          libsqlite3-dev \
+          libsdl2-dev \
+          libsdl2-image-dev \
+          libsdl2-mixer-dev \
+          libsdl2-ttf-dev \
+          libportmidi-dev \
+          libswscale-dev \
+          libavformat-dev \
+          libavcodec-dev \
+          libgstreamer1.0-dev \
+          gstreamer1.0-plugins-base \
+          gstreamer1.0-plugins-good \
+          autoconf \
+          libtool \
+          pkg-config \
+          libncurses5-dev \
+          libncursesw5-dev \
+          libtinfo-dev \
+          cmake \
+          libxml2-dev \
+          liblzma-dev \
+          m4 \
+          bison \
+          flex \
+          gperf \
+          lld \
+          clang \
+          libc++-dev \
+          libc++abi-dev \
+          libtool-bin
 
     - name: Pre-accept Android SDK licenses
       run: |
