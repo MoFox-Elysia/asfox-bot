@@ -4,8 +4,8 @@
 
 set timeout -1
 
-# Start sdkmanager with license acceptance
-spawn sdkmanager --licenses
+# Start sdkmanager with license acceptance using full path
+spawn /usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager --licenses
 
 # Accept all licenses
 expect {
