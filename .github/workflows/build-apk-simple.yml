@@ -111,10 +111,6 @@ jobs:
         export ANDROID_SDK_ROOT=/usr/local/lib/android/sdk
         export ANDROID_NDK_HOME=/usr/local/lib/android/sdk/ndk/27.3.13750724
         
-        # 使用 expect 脚本自动接受许可证
-        chmod +x accept_license.exp
-        ./accept_license.exp
-        
         # 运行 buildozer
         timeout 1800 buildozer android debug 2>&1 | tee build.log
         
