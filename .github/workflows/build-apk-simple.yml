@@ -40,6 +40,7 @@ jobs:
           openjdk-17-jdk \
           wget \
           curl \
+          expect \
           libffi-dev \
           libssl-dev \
           zlib1g-dev \
@@ -107,6 +108,8 @@ jobs:
         
         # 设置环境变量
         export BUILD_QUIET=1
+        export ANDROID_SDK_ROOT=/usr/local/lib/android/sdk
+        export ANDROID_NDK_HOME=/usr/local/lib/android/sdk/ndk/27.3.13750724
         
         # 运行 buildozer
         timeout 1800 buildozer android debug 2>&1 | tee build.log

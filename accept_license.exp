@@ -1,0 +1,26 @@
+#!/usr/bin/expect -f
+
+# Expect script to automatically accept Android SDK licenses
+
+set timeout -1
+
+# Start sdkmanager with license acceptance
+spawn sdkmanager --licenses
+
+# Accept all licenses
+expect {
+    "y/N" {
+        send "y\r"
+        exp_continue
+    }
+    "Accept? (y/N):" {
+        send "y\r"
+        exp_continue
+    }
+    eof {
+        exit 0
+    }
+    timeout {
+        exit 1
+    }
+}
