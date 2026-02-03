@@ -1,163 +1,42 @@
-name: Build Android APK (Simple and Fast)
+name: Build APK
 
 on:
   push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
+    runs-on: ubuntu-20.04
+    timeout-minutes: 120
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+    - uses: actions/checkout@v2
 
     - name: Set up Python
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v2
       with:
-        python-version: '3.10'
-        cache: 'pip'
+        python-version: '3.9'
 
-    - name: Install Python dependencies
-      run: |
-        python -m pip install --upgrade pip setuptools wheel
-        pip install Cython==0.29.36 buildozer==1.5.0 python-for-android==2024.1.21
-
-    - name: Install system dependencies
+    - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y \
-          build-essential \
-          git \
-          zip \
-          unzip \
-          python3-dev \
-          python3-venv \
-          openjdk-17-jdk \
-          wget \
-          curl \
-          expect \
-          libffi-dev \
-          libssl-dev \
-          zlib1g-dev \
-          libjpeg-dev \
-          libpng-dev \
-          libfreetype6-dev \
-          libsqlite3-dev \
-          libsdl2-dev \
-          libsdl2-image-dev \
-          libsdl2-mixer-dev \
-          libsdl2-ttf-dev \
-          libportmidi-dev \
-          libswscale-dev \
-          libavformat-dev \
-          libavcodec-dev \
-          libgstreamer1.0-dev \
-          gstreamer1.0-plugins-base \
-          gstreamer1.0-plugins-good \
-          autoconf \
-          libtool \
-          pkg-config \
-          libncurses5-dev \
-          libncursesw5-dev \
-          libtinfo-dev \
-          cmake \
-          libxml2-dev \
-          liblzma-dev \
-          m4 \
-          bison \
-          flex \
-          gperf \
-          lld \
-          clang \
-          libc++-dev \
-          libc++abi-dev \
-          libtool-bin
+        sudo apt-get install -y build-essential git python3-dev openjdk-8-jdk zlib1g-dev libjpeg-dev libpng-dev libfreetype6-dev libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev libgstreamer1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good libsqlite3-dev
+        pip install Cython==0.29.28 buildozer==1.2.0 python-for-android==2020.11.25
 
-    - name: Pre-accept Android SDK licenses
+    - name: Accept licenses
       run: |
-        # 创建必要的目录
-        mkdir -p ~/.android
-        
-        # 接受所有 Android SDK 许可证
-        echo "Pre-accepting Android SDK licenses..."
-        
-        # 创建 licenses 目录
         mkdir -p ~/.android/licenses
-        
-        # 写入所有必要的许可证
-        echo "89316a2ffe0e01b6d91f2f87be9676f5e584ddc6" > ~/.android/licenses/android-sdk-license
-        echo "24333f8a63b6825ea9c5514f83c2829b004d1fee" >> ~/.android/licenses/android-sdk-license
-        echo "d56f5187479451eabf01fb78af6dfcb131a6481e" > ~/.android/licenses/android-sdk-preview-license
+        echo "24333f8a63b6825ea9c5514f83c2829b004d1fee" > ~/.android/licenses/android-sdk-license
         echo "84831b9409646a918e30573bab4c9c91346d8abd" > ~/.android/licenses/android-sdk-arm-dbt-license
-        echo "601085b94cd77f0b54ff86406957099ebe79c4d6" > ~/.android/licenses/android-googletv-license
-        echo "33b6a2b64607f11b759f320ef9dff4ae5c47d97a" > ~/.android/licenses/google-gdk-license
-        echo "598de3d68902ef498f5f38e4556397f3a3d4f2f6" > ~/.android/licenses/google-adt-license
-        echo "b1a93704f8999a271b9d38f9e6100153e4ee94e5" > ~/.android/licenses/google-android-ndk-license
-        echo "6a4b4b7c3d0b0f5e1a2c3d4e5f6a7b8c9d0e1f2" > ~/.android/licenses/google-android-license
-        
-        echo "Android SDK licenses pre-accepted"
+        echo "d56f5187479451eabf01fb78af6dfcb131a6481e" > ~/.android/licenses/android-sdk-preview-license
 
-    - name: Build APK with Buildozer
+    - name: Build
       run: |
-        # 创建必要的目录结构
-        mkdir -p ~/.buildozer/android/platform
-        
-        echo "Starting Buildozer build (this may take 15-20 minutes)..."
-        
-        # 设置环境变量
-        export BUILD_QUIET=1
-        export ANDROID_SDK_ROOT=/usr/local/lib/android/sdk
-        export ANDROID_NDK_HOME=/usr/local/lib/android/sdk/ndk/27.3.13750724
-        
-        # 运行 buildozer
-        timeout 3600 buildozer android debug 2>&1 | tee build.log
-        
-        # 检查结果
-        if ls bin/*.apk 2>/dev/null; then
-          echo "✅ APK build successful!"
-          ls -lh bin/*.apk
-        else
-          echo "❌ APK build failed. Last 100 lines of build.log:"
-          tail -100 build.log
-          echo "Checking for common issues..."
-          grep -i "error\|fail\|missing\|not found" build.log | head -30
-          exit 1
-        fi
+        buildozer android debug
 
-    - name: Prepare artifacts
-      run: |
-        mkdir -p artifacts
-        # 查找所有 APK 文件
-        find . -name "*.apk" -type f -exec cp {} artifacts/ \;
-        
-        if [ -z "$(ls -A artifacts/ 2>/dev/null)" ]; then
-          echo "No APK files found. Available files in bin/:"
-          ls -la bin/ 2>/dev/null || echo "bin/ directory not found"
-          echo "Current directory contents:"
-          ls -la
-        else
-          echo "APK files found:"
-          ls -lh artifacts/
-        fi
-
-    - name: Upload APK artifact
-      if: success()
-      uses: actions/upload-artifact@v4
+    - name: Upload
+      uses: actions/upload-artifact@v2
       with:
-        name: debug-apk
-        path: artifacts/*.apk
-        retention-days: 30
-        if-no-files-found: warn
-
-    - name: Upload build log
-      uses: actions/upload-artifact@v4
-      with:
-        name: build-log
-        path: build.log
-        retention-days: 7
-        if-no-files-found: warn
+        name: apk
+        path: bin/*.apk

@@ -1,7 +1,5 @@
-kivy==2.3.0
-Pillow==10.2.0
-fpdf2==2.7.6
-pyjnius==1.6.1
-plyer==2.1.0
-Cython==0.29.36
-pyopenssl==23.2.0
+kivy==2.1.0
+Pillow==9.5.0
+pyjnius==1.4.2
+plyer==2.0.0
+Cython==0.29.28
